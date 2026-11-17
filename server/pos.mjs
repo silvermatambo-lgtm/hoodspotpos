@@ -108,7 +108,7 @@ async function login(req,sql){
 }
 
 async function report(sql,u,range){
-  const days={today:1,week:7,month:30}[range];
+  const days=new Map([['today',1],['week',7],['month',30]]).get(range);
   assert(days,'Choose today, week or month.');
   const workspace=u.workspace;
   const [totals,series,top,recent,stocks,payments]=await sql.transaction([
@@ -175,7 +175,7 @@ export async function handle(req){
   try{
     const url=new URL(req.url),route=(url.searchParams.get('route')||url.pathname.replace(/^\/api\/v1\/?/,'')).replace(/^\/+|\/+$/g,'');
     const verb=req.method;
-    if(verb==='GET'&&route==='')return json(endpointInfo);
+    if(verb==='GET'&&(route===''||route==='discovery'))return json(endpointInfo);
     if(!['GET','HEAD','OPTIONS'].includes(verb))sameOrigin(req);
     const sql=initial();
     if(verb==='GET'&&route==='health'){

@@ -1,5 +1,5 @@
 /* Adapted from UltraMax 7 Pro's app-shell caching. The API is always network-only. */
-const version='hoodspot-shell-v1';
+const version='hoodspot-shell-v2';
 const files=['/','/styles.css','/app.js','/icons.js','/pwa.js','/logo.svg','/icon-192.png','/icon-512.png','/icon-maskable.png','/manifest.webmanifest'];
 self.addEventListener('install', e=>e.waitUntil(caches.open(version).then(cache=>cache.addAll(files))));
 self.addEventListener('activate', e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('hoodspot-shell-')&&k!==version).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

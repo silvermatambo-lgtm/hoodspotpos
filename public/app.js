@@ -10,7 +10,7 @@ const tabs={pos:['Register','pos'],dashboard:['Overview','dashboard'],inventory:
 const groups=['Beer','Cider','Spirits','Mixers','Soft drinks'];
 const key='hoodspot:v1:';
 const store={get(k,f=null){try{return JSON.parse(localStorage.getItem(key+k))??f}catch{return f}},set(k,v){localStorage.setItem(key+k,JSON.stringify(v))},del(k){localStorage.removeItem(key+k)}};
-const requestedWorkspace=new URLSearchParams(location.search).get('workspace')||'';
+const requestedWorkspace=new URLSearchParams(location.hash.slice(1)).get('workspace')||new URLSearchParams(location.search).get('workspace')||'';
 if(requestedWorkspace){try{store.set('workspace',requestedWorkspace);history.replaceState({},'',location.pathname)}catch{}}
 const s={user:null,view:'pos',products:[],cart:new Map(),category:'All drinks',search:'',online:navigator.onLine,range:'today',report:null,inventory:null,receipts:null,staff:null,loading:false,loadError:'',busy:false,printing:store.get('printing',true),role:'cashier',workspace:store.get('workspace',''),cashierDrawer:false,syncing:false,catalogLoading:false};
 const errorNotice=e=>e?.message||'Something went wrong. Please try again.';
@@ -270,7 +270,7 @@ function stockDialog(p){
 }
 function staffDialog(p){
  openModal(p?'Edit cashier access':'Add cashier',`<form id="staffForm" data-id="${esc(p?.username)}"><label>Display name<input name="name" value="${esc(p?.display_name)}" required minlength="2" maxlength="64"></label>
- <label>Username<input name="username" value="${esc(p?.username)}" ${p?'readonly':''} required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9._\-]{2,31}"></label>
+ <label>Username<input name="username" value="${esc(p?.username)}" ${p?'readonly':''} required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9._\\-]{2,31}"></label>
  <label>${p?'New password (optional)':'Password'}<input name="password" autocomplete="new-password" ${p?'':'required'} type="password" minlength="8" maxlength="128"></label>
  ${p?`<label class="checkbox"><input name="active" type="checkbox" ${p.active?'checked':''}> Account active</label>`:'<p class="muted">Cashiers can sell and view their own receipts. They cannot see costs or profits.</p>'}
  ${formError()}${actions('Save account')}</form>`);
@@ -351,7 +351,7 @@ document.addEventListener('click',async e=>{
  case 'refresh':loadView();break;
  case 'print-last':if(s.lastReceipt)printReceipt(s.lastReceipt.r,s.lastReceipt.p);break;
  case 'copy-code':copy(s.user.workspace);break;
- case 'copy-join':copy(`${location.origin}/?workspace=${encodeURIComponent(s.user.workspace)}`);break;
+ case 'copy-join':copy(`${location.origin}/#workspace=${encodeURIComponent(s.user.workspace)}`);break;
  }
 });
 modal.addEventListener('cancel',e=>{if(s.busy)e.preventDefault()});
