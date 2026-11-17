@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>REST API · Hood Spot POS</title><link rel="stylesheet" href="/styles.css"><link rel="icon" href="/logo.svg"></head>
+<body><main class="docs"><a href="/" class="brand"><img src="/logo.svg" width="39" height="39" alt=""> HOOD SPOT POS</a><h1>REST API v1</h1><p>Use the <code>/api/v1/</code> prefix on this deployment. <a href="/api/v1/health">Check API and database health</a>.</p>
+<h2>Sign in and make a request</h2><p>The API uses an HttpOnly session cookie. Keep the returned cookie in your client and include it with later requests. Sign in with <code>owner / Owner@2026</code> or <code>cashier / Till@2026</code>. Omit the workspace code to create a new workspace, or pass your existing code to join it. Demo data only.</p>
+<pre>POST /api/v1/session
+Content-Type: application/json
+
+{"username":"cashier","password":"Till@2026","workspace":""}</pre>
+<p>Get the product ID and price from <code>GET /api/v1/catalog</code>. Amounts are integer USD cents. Generate a fresh UUID v4 for each new sale and send the exact same payload if retrying.</p>
+<pre>POST /api/v1/sales
+Content-Type: application/json
+
+{
+  "id": "d91f5df2-426b-49bb-8fb1-1971a4f2a9ba",
+  "items": [{"id":"&lt;product UUID&gt;","qty":1,"price":200}],
+  "payment":"cash",
+  "tendered":200,
+  "soldAt":"&lt;current ISO 8601 timestamp&gt;"
+}</pre>
+<h2>Resources</h2><div class="table-wrap"><table><thead><tr><th>Method and resource</th><th>Access</th><th>What it does</th></tr></thead><tbody>
+<tr><td>GET /health</td><td>Public</td><td>Service and database status</td></tr>
+<tr><td>POST /session</td><td>Public</td><td>Authenticate and set session cookie</td></tr>
+<tr><td>GET /session · DELETE /session</td><td>Signed in</td><td>Read or end the session</td></tr>
+<tr><td>GET /catalog</td><td>Signed in</td><td>Active products, retail prices, stock and alert levels. No costs</td></tr>
+<tr><td>GET /sales · POST /sales</td><td>Signed in</td><td>Read own receipts or record a sale. Accepted payment values are cash, ecocash and card. No payment processing</td></tr>
+<tr><td>GET /report?range=today</td><td>Owner</td><td>Sales, gross profit, best sellers and payment mix. Range can be today, week or month</td></tr>
+<tr><td>GET /stock</td><td>Owner</td><td>Inventory, cost and stock activity</td></tr>
+<tr><td>POST /products · PATCH /products/{id}</td><td>Owner</td><td>Create or edit products. Fields are name, category, price, cost, low, active, and opening stock on create</td></tr>
+<tr><td>POST /stock/{id}/adjustments</td><td>Owner</td><td>Change stock. Fields are delta (signed units) and reason</td></tr>
+<tr><td>GET /staff · POST /staff · PATCH /staff/{username}</td><td>Owner</td><td>List, add and update cashier access. Use username, name, password on create, and name, active, optional password on update</td></tr>
+</tbody></table></div><p>Expected responses include 401 for expired or missing sign-in, 403 for role restrictions, 409 for stock or price conflicts and 429 for rate limits.</p><p><a href="/">Return to Hood Spot POS</a></p></main></body></html>

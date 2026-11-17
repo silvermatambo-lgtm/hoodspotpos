@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071c2b">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Hood Spot POS · Cloud point of sale for busy bars, built for the till and the owner.">
+<title>Hood Spot POS · Bar operations</title>
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/styles.css">
+<script type="module" src="/app.js"></script>
+<script defer src="/pwa.js"></script>
+</head>
+<body>
+<div id="app"><div class="boot" role="status"><img src="/logo.svg" alt=""><strong>Hood Spot POS</strong><span>Loading workspace…</span></div></div>
+<div id="toast" class="toast" role="status" hidden></div>
+<dialog id="modal" class="dialog" aria-labelledby="modalTitle"></dialog>
+<dialog id="installDialog" class="dialog" aria-labelledby="installTitle">
+  <div class="modal-head"><h2 id="installTitle">Install Hood Spot POS</h2></div>
+  <p id="installStatus"></p><div class="actions"><button id="closeDialog" class="btn">Close</button><button id="installNow" class="btn primary" hidden>Install app</button></div>
+</dialog>
+<section id="print-area" aria-hidden="true"></section>
+<noscript><p>This point of sale requires JavaScript.</p></noscript>
+</body>
+</html>
