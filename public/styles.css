@@ -28,4 +28,13 @@
 @media(max-width:350px){.welcome-actions button span{display:none}.payment-options button{font-size:.69rem}.payment-options button svg{width:15px}.stock-chip,.product-category{font-size:.5rem;padding:3px 4px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 @page{size:auto;margin:0}
+/* Generated catalog photography blends into the register's dark tile and retains the full bottle silhouette. */
+.product:has(.has-photo){grid-template-rows:124px 1fr}
+.product-art.has-photo{background:radial-gradient(ellipse at center,#06243a,#02111e 77%);isolation:isolate;}
+.catalog-photo{display:block;height:100%;width:auto;max-width:100%;object-fit:contain;position:absolute;inset:0;margin:auto;mask-image:linear-gradient(90deg,transparent 0%,#000 15%,#000 85%,transparent 100%);}
+.product-art .product-category,.product-art .stock-chip{z-index:1}
+.photo-fallback{position:relative}
+.inventory-product{display:inline-flex;align-items:center;gap:9px;vertical-align:middle;margin-right:4px}
+.inventory-photo{width:34px;height:34px;border:1px solid #355364;border-radius:7px;object-fit:cover}
+@media(max-width:700px){.product:has(.has-photo){grid-template-rows:102px 1fr}}
 @media print{html,body{background:#fff;color:#000;margin:0;padding:0;width:80mm;min-width:0}body>*{display:none!important}#print-area{display:block!important;width:80mm;padding:4mm}#print-area .receipt-paper{width:72mm;max-width:none;margin:0;padding:0;color:#000;background:#fff;border:0;border-radius:0}#print-area img{filter:grayscale(1)}}

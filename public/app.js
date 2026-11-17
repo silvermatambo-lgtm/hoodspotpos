@@ -1,4 +1,5 @@
 import {icon,drink} from './icons.js';
+import {productPhoto} from './product-photos.js';
 const app=document.querySelector('#app'), modal=document.querySelector('#modal'), toast=document.querySelector('#toast'), printArea=document.querySelector('#print-area');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const amount=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format((v||0)/100);
@@ -126,11 +127,24 @@ function register(){
  <aside class="order ${s.cashierDrawer?'drawer-open':''}" id="orderBox">${order()}</aside>
  <button class="mobile-cart btn primary" data-action="toggle-cart">${icon('cart',19)} <span id="mobileCartLabel">${cartQty()} items · ${amount(cartTotal())}</span> ${icon('arrow',19)}</button></div>`;
 }
+function photoMarkup(p,thumb=false){
+ const src=productPhoto(p.category,p.name);
+ if(!src)return thumb?'':drink(p.category,p.name);
+ const fallback=thumb?'':drink(p.category,p.name);
+ return `<img data-product-photo class="${thumb?'inventory-photo':'catalog-photo'}" src="${src}" alt="" width="320" height="320" decoding="async">${fallback?`<span class="photo-fallback" hidden>${fallback}</span>`:''}`;
+}
+document.addEventListener('error',e=>{
+ const image=e.target;
+ if(!image.matches?.('[data-product-photo]'))return;
+ image.hidden=true;
+ const fallback=image.nextElementSibling;
+ if(fallback?.classList.contains('photo-fallback'))fallback.hidden=false;
+},true);
 function productCards(){
  const filtered=s.products.filter(p=>(s.category==='All drinks'||p.category===s.category)&&(`${p.name} ${p.category}`).toLowerCase().includes(s.search.toLowerCase().trim()));
  return filtered.length?filtered.map(p=>{
-  const count=effective(p), tone=({'Beer':'beer','Cider':'cider','Spirits':'spirit','Mixers':'mixer','Soft drinks':'soft'})[p.category]||'beer';
-  return `<button class="product" data-add="${p.id}" ${!count||(!s.online&&!canOffline())?'disabled':''}><div class="product-art ${tone}"><span class="product-category">${esc(p.category)}</span>${drink(p.category,p.name)}${count<=p.low?`<span class="stock-chip ${count?'':'out'}">${count?'LOW':'SOLD OUT'}</span>`:''}</div><div class="product-meta"><strong>${esc(p.name)}</strong><div><span>${amount(p.price)}</span><small>${number(count)} in stock</small></div></div></button>`;
+  const count=effective(p), hasPhoto=Boolean(productPhoto(p.category,p.name)), tone=({'Beer':'beer','Cider':'cider','Spirits':'spirit','Mixers':'mixer','Soft drinks':'soft'})[p.category]||'beer';
+  return `<button class="product" data-add="${p.id}" ${!count||(!s.online&&!canOffline())?'disabled':''}><div class="product-art ${tone}${hasPhoto?' has-photo':''}"><span class="product-category">${esc(p.category)}</span>${photoMarkup(p)}${count<=p.low?`<span class="stock-chip ${count?'':'out'}">${count?'LOW':'SOLD OUT'}</span>`:''}</div><div class="product-meta"><strong>${esc(p.name)}</strong><div><span>${amount(p.price)}</span><small>${number(count)} in stock</small></div></div></button>`;
  }).join(''):`<div class="empty catalog-empty">${icon('search',28)}<strong>${s.products.length?'No drinks match your search':s.online?'Loading the drink catalog…':'No cached catalog available'}</strong><span>${s.products.length?'Try another category or search.':s.online?'Check your connection if this takes a while.':'Sign in online on this device to enable offline selling.'}</span></div>`;
 }
 const cartQty=()=>[...s.cart.values()].reduce((sum,i)=>sum+i.qty,0);
@@ -186,7 +200,7 @@ function inventory(){
  if(!d||!s.online||s.loadError)return top+unavailable();
  const low=d.products.filter(p=>p.active&&p.stock<=p.low).length;
  return `${top}${low?`<div class="notice">${icon('alert',18)} <strong>${low} ${low===1?'product is':'products are'} at or below its stock alert level.</strong> Use Adjust stock after receiving new stock.</div>`:''}
- <section class="pane"><div class="pane-head"><div><h2>Product catalog</h2><p>${d.products.length} products · prices in USD</p></div></div><div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Cost</th><th>On hand</th><th>Alert at</th><th>Actions</th></tr></thead><tbody>${d.products.map(p=>`<tr><td><strong>${esc(p.name)}</strong>${p.active?'':' <span class="soft-tag">Hidden</span>'}</td><td>${esc(p.category)}</td><td>${amount(p.price)}</td><td>${amount(p.cost)}</td><td><span class="soft-tag ${p.active&&p.stock<=p.low?'warning':''}">${number(p.stock)}${p.active&&p.stock<=p.low?' · Low':''}</span></td><td>${number(p.low)}</td><td><div class="table-actions"><button class="btn outline compact" data-restock="${p.id}">Adjust stock</button><button class="btn outline compact" data-product="${p.id}">Edit</button></div></td></tr>`).join('')}</tbody></table></div></section>
+ <section class="pane"><div class="pane-head"><div><h2>Product catalog</h2><p>${d.products.length} products · prices in USD</p></div></div><div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Cost</th><th>On hand</th><th>Alert at</th><th>Actions</th></tr></thead><tbody>${d.products.map(p=>`<tr><td><span class="inventory-product">${photoMarkup(p,true)}<strong>${esc(p.name)}</strong></span>${p.active?'':' <span class="soft-tag">Hidden</span>'}</td><td>${esc(p.category)}</td><td>${amount(p.price)}</td><td>${amount(p.cost)}</td><td><span class="soft-tag ${p.active&&p.stock<=p.low?'warning':''}">${number(p.stock)}${p.active&&p.stock<=p.low?' · Low':''}</span></td><td>${number(p.low)}</td><td><div class="table-actions"><button class="btn outline compact" data-restock="${p.id}">Adjust stock</button><button class="btn outline compact" data-product="${p.id}">Edit</button></div></td></tr>`).join('')}</tbody></table></div></section>
  <section class="pane sub-pane"><div class="pane-head"><div><h2>Stock activity</h2><p>Latest sales and manual stock adjustments</p></div></div>${d.movements.length?`<div class="table-wrap"><table><thead><tr><th>Product</th><th>Change</th><th>Reason</th><th>By</th><th>Time</th></tr></thead><tbody>${d.movements.map(m=>`<tr><td><strong>${esc(m.name)}</strong></td><td>${m.delta>0?'+':''}${m.delta}</td><td>${esc(m.reason)}</td><td>${esc(m.actor)}</td><td>${formatDate(m.occurred_at)}</td></tr>`).join('')}</tbody></table></div>`:blank('stock','No stock movements yet','New sales and manual stock adjustments will appear here.')}</section>`;
 }
 function staffView(){
